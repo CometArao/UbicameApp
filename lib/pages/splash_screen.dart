@@ -9,10 +9,34 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _controller.forward();
+
     var d = const Duration(seconds: 5);
     Future.delayed(d, () {
       Navigator.pushAndRemoveUntil(
@@ -21,6 +45,12 @@ class _SplashScreenState extends State<SplashScreen> {
         (route) => false,
       );
     });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -35,16 +65,45 @@ class _SplashScreenState extends State<SplashScreen> {
                 fit: BoxFit.cover,
               ),
             ),
-            child: const Align(
-              alignment: Alignment.bottomCenter,
-              child: ListTile(
-                titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
-                subtitleTextStyle:
-                    TextStyle(color: Colors.white70, fontSize: 18), // Subtítulo
-                title: Text("GPS App", textAlign: TextAlign.center),
-                subtitle: Text("Bienvenido estudiantes",
-                    textAlign: TextAlign.center), // Subtítulo
-              ),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: const Text(
+                    'UbicameUBB',
+                    style: TextStyle(
+                      fontSize: 50.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: const Image(
+                      image: AssetImage('assets/logo.png'),
+                      width: 100,
+                      height: 100,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Align(
+            alignment: Alignment.bottomCenter,
+            child: ListTile(
+              titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
+              subtitleTextStyle: TextStyle(color: Colors.white70, fontSize: 18),
+              title: Text("GPS App", textAlign: TextAlign.center),
+              subtitle:
+                  Text("Bienvenido estudiantes", textAlign: TextAlign.center),
             ),
           ),
           const Padding(

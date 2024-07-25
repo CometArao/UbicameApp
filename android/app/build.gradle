@@ -23,9 +23,23 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+// Verificar y cargar el archivo .env
+def envProperties = new Properties()
+// Cambiamos la ruta para buscar el archivo en el directorio raíz del proyecto
+def envFile = rootProject.file('../.env')
+if (envFile.exists()) {
+    println(".env file found at: ${envFile.absolutePath}") // Línea de depuración
+    envFile.withInputStream { stream ->
+        envProperties.load(stream)
+    }
+} else {
+    println(".env file not found at: ${envFile.absolutePath}") // Línea de depuración
+    throw new IllegalStateException(".env file not found. Please create .env file in the root directory with GMP_KEY")
+}
+
 android {
     namespace = 'com.ubicame.app'
-    compileSdkVersion 34  // Actualiza a la versión 34
+    compileSdkVersion 34
     ndkVersion '21.4.7075529'
 
     compileOptions {
@@ -36,9 +50,11 @@ android {
     defaultConfig {
         applicationId = 'com.ubicame.app'
         minSdkVersion 21
-        targetSdkVersion 34  // Actualiza a la versión 34
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        // Pasar GMP_KEY como una propiedad de construcción
+        manifestPlaceholders = [GMP_KEY: envProperties['GMP_KEY']]
     }
 
     buildTypes {
